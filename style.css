@@ -134,6 +134,52 @@ button:hover{
     box-shadow:0 4px 20px rgba(30, 144, 255, 0.4);
 )
 
+.register p a{
+    text-decoration:none;
+    color:#1e90ff;
+    font-weight:600;
+}
+
+.register p a:hover{
+    text-decoration:underline;
+}
+
+.social-platforms{
+    margin-top:30px;
+}
+
+.social-platforms p{
+    color:#1e90ff;
+    margin-bottom:15px;
+    font-size:0.9rem;
+}
+
+.social-icons{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+}
+
+.social-icons a{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:40px;
+    height:40px;
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:50%;
+    color:#1e90ff;
+    text-decorations:none;
+    transition:all 0.3s ease;
+    backdrop-filler:blur(10px);
+}
+
+.social-icons a:hover{
+    background:rgba(30,144,255,0.2);
+    transform:translateY(-2px);
+    box-shadow:0 4px 15px rgba(30,144,255,0.3);
+}
 
 @media(max-width:480px){
     .wrapper{
