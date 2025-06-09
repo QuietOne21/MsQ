@@ -56,6 +56,12 @@ h2{
     letter-spacing:1px;
 }
 
+.input-field{
+    position:relative;
+    border-bottom:2px solid #1e90ff;
+    margin:15px 0;
+}
+
 .input-field label{
     position: absolute;
     top:50%;
@@ -65,6 +71,12 @@ h2{
     font-size:16px;
     pointer-events:none;
     transition:0.3s ease;
+}
+
+.input-field{
+    position:relative;
+    border-bottom:2px solid #1e90ff;
+    margin:15px 0;
 }
 
 .input-field input{
@@ -84,5 +96,17 @@ h2{
     top:10px;
     transform:translateY(-150%);
     color:#1e90ff;
+}
+
+.forget{
+    display:flex;
+    justify-content:space-between;
+    margin:25px 0 35px 0;
+    color: #1e90ff;
+}
+
+.forget a{
+    color:#1e90ff;
+    text-decoration:none;
 }
 
