@@ -110,3 +110,40 @@ h2{
     text-decoration:none;
 }
 
+.forget a:hover{
+    text-decoration:underline;
+}
+
+button{
+    position:relative;
+    width:100%;
+    height:40px;
+    background:linear-gradient(135deg, #1e90ff, #add8e6);
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:1rem;
+    color:#fff;
+    font-weight:500;
+    transition:all 0.3s ease;
+}
+
+button:hover{
+    background:linear-gradient(135deg, #add8e6, #1e90ff);
+    transform:translateY(-2px);
+    box-shadow:0 4px 20px rgba(30, 144, 255, 0.4);
+)
+
+
+@media(max-width:480px){
+    .wrapper{
+        width:90px;
+        padding:30px;
+    }
+    h2{
+        font-size:1.8rem;
+    }
+}
+
+
+
