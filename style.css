@@ -24,7 +24,7 @@ body::before{
     height:100%;
     background:url(b1.gif);
     background-position:center;
-    background-size:cover;
+    background-size:120%;
     z-index:-1;
 }
 
