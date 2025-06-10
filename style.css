@@ -189,7 +189,7 @@ button:hover{
     border:1px solid rgba(255,255,255,0.2);
     border-radius:50%;
     color:#ffffff;
-    text-decorations:none;
+    text-decoration:none;
     transition:all 0.3s ease;
     backdrop-filter:blur(10px);
 }
