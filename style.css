@@ -67,7 +67,7 @@ h2{
     top:50%;
     left:0;
     transform:translateY(-50%);
-    color:#1e90ff;
+    color:#000000;
     font-size:16px;
     pointer-events:none;
     transition:0.3s ease;
@@ -95,7 +95,7 @@ h2{
     font-size:0.9rem;
     top:10px;
     transform:translateY(-150%);
-    color:#1e90ff;
+    color:#000000;
 }
 
 .forget{
