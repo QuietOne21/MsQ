@@ -1,16 +1,44 @@
- const form=document.getElementById("loginForm");
- form.addEventListener("register",function(e){
-      e.preventDefault();
-      window.location.href="index2.html";
+//Handle Login Form
+const loginForm = document.getElementById("loginForm");
+ if (loginForm){
+  loginForm.addEventListener("submit",function(e){
+   e.preventDefault();
+   window.location.href="index3.html";
   });
 
-const form=document.getElementById("signUpForm");
-form.addEventListener("signIn",function(e){
+//Handle "Register" link click
+const registerLink = loginForm.querySelector(".register a");
+  registerLink.addEventListener("click",function(e){
+   e.preventDefault();
+   window.location.href = "index2.html";
+  });
+ }
+
+//Handle sign-up form
+const signUpForm = document.getElementById("signUpForm");
+if(signUpForm){
+ signUpForm.addEventListener("submit",function(e){
   e.preventDefault();
-  window.location.href="index1.html";
-});
+  window.location.href = "index1.html";
+ });
+
+ //Handle "Login" link click
+ const loginLink = signUpForm.querySelector(".signIn a");
+ loginLink.addEventListener("click",function(e){
+  e.preventDefault();
+  window.location.href = "index1.html";
+ });
+}
 
 
+
+
+
+
+
+
+
+ 
 
   const firebaseConfig = {
     apiKey: "AIzaSyD0V9jyO2m6ZjXmJxDrKaOyCTonvtpKfKU",
