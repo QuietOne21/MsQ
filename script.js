@@ -34,14 +34,14 @@ const signUpForm = document.getElementById("signUpForm");
 if(signUpForm){
  signUpForm.addEventListener("submit",function(e){
   e.preventDefault();
-  window.location.href = "index1.html";
+  window.location.href = "index.html";
  });
 
  //Handle "Login" link click
  const loginLink = signUpForm.querySelector(".signIn a");
  loginLink.addEventListener("click",function(e){
   e.preventDefault();
-  window.location.href = "index1.html";
+  window.location.href = "index.html";
  });
 }
 
