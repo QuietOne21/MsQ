@@ -18,24 +18,25 @@ const auth = getAuth(app);
 const database = getDatabase(app);
 const analytics = getAnalytics(app);
 
-// Utility function to show user-friendly messages
-function showMessage(message, isError = false) {
-    // You can replace this with a better UI notification system
-    if (isError) {
-        console.error(message);
+// Password validation function
+function validatePassword(password) {
+    if (password.length <= 6) {
+        return "Password must be greater than 6 characters";
     }
-    alert(message);
-}
-
-// Utility function to validate email format
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-// Utility function to validate password strength
-function isValidPassword(password) {
-    return password.length >= 6; // Firebase minimum requirement
+    
+    if (!/\d/.test(password)) {
+        return "Password must include at least one number";
+    }
+    
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        return "Password must include at least one special character";
+    }
+    
+    if (!/[a-zA-Z]/.test(password)) {
+        return "Password must include at least one letter";
+    }
+    
+    return null; // Password is valid
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -44,92 +45,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginForm) {
         loginForm.addEventListener("submit", async function(e) {
             e.preventDefault();
-            
-            const emailInput = loginForm.querySelector("input[type='email']");
-            const passwordInput = loginForm.querySelector("input[type='password']");
-            
-            if (!emailInput || !passwordInput) {
-                showMessage("Form elements not found", true);
-                return;
-            }
-            
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            
-            // Basic validation
-            if (!email || !password) {
-                showMessage("Please fill in all fields", true);
-                return;
-            }
-            
-            if (!isValidEmail(email)) {
-                showMessage("Please enter a valid email address", true);
-                return;
-            }
+            const email = loginForm.querySelector("input[type='email']").value.trim();
+            const password = loginForm.querySelector("input[type='password']").value;
             
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                showMessage("Login successful!");
+                alert("Login successful");
                 window.location.href = "index3.html";
             } catch (error) {
-                let errorMessage = "Login failed";
-                
-                // Provide user-friendly error messages
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = "No account found with this email";
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = "Incorrect password";
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = "Invalid email address";
-                        break;
-                    case 'auth/too-many-requests':
-                        errorMessage = "Too many failed attempts. Please try again later";
-                        break;
-                    default:
-                        errorMessage = error.message;
-                }
-                
-                showMessage(errorMessage, true);
+                alert("Login failed: " + error.message);
             }
         });
-        
-          // Handle "Register" link click - Multiple selector attempts
-        let registerLink = loginForm.querySelector(".register a");
-        
-        if (!registerLink) {
-            // Try alternative selectors
-            registerLink = loginForm.querySelector("a[href='#']") || 
-                          loginForm.querySelector("a") ||
-                          document.querySelector(".register a");
-        }
-        
-        if (registerLink) {
-            console.log("Register link found and event listener added");
-            registerLink.addEventListener("click", function(e) {
-                e.preventDefault();
-                console.log("Register link clicked");
-                window.location.href = "index2.html";
-            });
-        } else {
-            console.error("Register link not found. Please check your HTML structure.");
-        }
+    }
     
     // Handle Sign-up Form
     const signUpForm = document.getElementById("signUpForm");
     if (signUpForm) {
         signUpForm.addEventListener("submit", async function(e) {
             e.preventDefault();
-            
             const inputs = signUpForm.querySelectorAll("input");
-            
-            if (inputs.length < 6) {
-                showMessage("Form is missing required fields", true);
-                return;
-            }
-            
             const name = inputs[0].value.trim();
             const surname = inputs[1].value.trim();
             const email = inputs[2].value.trim();
@@ -137,30 +71,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const password = inputs[4].value;
             const confirmPassword = inputs[5].value;
             
-            // Validation
-            if (!name || !surname || !email || !phone || !password || !confirmPassword) {
-                showMessage("Please fill in all fields", true);
-                return;
-            }
-            
-            if (!isValidEmail(email)) {
-                showMessage("Please enter a valid email address", true);
-                return;
-            }
-            
-            if (!isValidPassword(password)) {
-                showMessage("Password must be at least 6 characters long", true);
-                return;
-            }
-            
             if (password !== confirmPassword) {
-                showMessage("Passwords do not match", true);
+                alert("Passwords do not match");
                 return;
             }
             
-            // Basic phone validation (you can make this more sophisticated)
-            if (phone.length < 10) {
-                showMessage("Please enter a valid phone number", true);
+            // Validate password strength
+            const passwordError = validatePassword(password);
+            if (passwordError) {
+                alert(passwordError);
                 return;
             }
             
@@ -168,47 +87,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
-                // Save additional user data to database
                 await set(ref(database, "users/" + user.uid), {
                     name: name,
                     surname: surname,
                     phone: phone,
-                    email: email,
-                    createdAt: new Date().toISOString()
+                    email: email
                 });
                 
-                showMessage("Account created successfully!");
+                alert("Account created successfully!");
                 window.location.href = "index1.html";
-                
             } catch (error) {
-                let errorMessage = "Registration failed";
-                
-                // Provide user-friendly error messages
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = "An account with this email already exists";
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = "Invalid email address";
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = "Password is too weak";
-                        break;
-                    default:
-                        errorMessage = error.message;
-                }
-                
-                showMessage(errorMessage, true);
+                alert("Error: " + error.message);
             }
         });
+    }
+});
+
+// Simple global click handler for navigation links
+document.addEventListener("click", function(e) {
+    if (e.target.tagName === "A") {
+        const linkText = e.target.textContent.toLowerCase();
         
-        // Handle "Login" link click
-        const loginLink = signUpForm.querySelector(".signIn a");
-        if (loginLink) {
-            loginLink.addEventListener("click", function(e) {
-                e.preventDefault();
-                window.location.href = "index1.html"; // Fixed: should go to login page
-            });
+        if (linkText.includes("register")) {
+            e.preventDefault();
+            window.location.href = "index2.html";
+        } else if (linkText.includes("login")) {
+            e.preventDefault();
+            window.location.href = "index1.html";
         }
     }
 });
