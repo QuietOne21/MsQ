@@ -96,15 +96,26 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         
-        // Handle "Register" link click
-        const registerLink = loginForm.querySelector(".register a");
+          // Handle "Register" link click - Multiple selector attempts
+        let registerLink = loginForm.querySelector(".register a");
+        
+        if (!registerLink) {
+            // Try alternative selectors
+            registerLink = loginForm.querySelector("a[href='#']") || 
+                          loginForm.querySelector("a") ||
+                          document.querySelector(".register a");
+        }
+        
         if (registerLink) {
+            console.log("Register link found and event listener added");
             registerLink.addEventListener("click", function(e) {
                 e.preventDefault();
+                console.log("Register link clicked");
                 window.location.href = "index2.html";
             });
+        } else {
+            console.error("Register link not found. Please check your HTML structure.");
         }
-    }
     
     // Handle Sign-up Form
     const signUpForm = document.getElementById("signUpForm");
