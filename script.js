@@ -25,6 +25,7 @@
         });
     }
 });
+
 // Simple global click handler for navigation links
 document.addEventListener("click", function(e) {
     if (e.target.tagName === "A") {
