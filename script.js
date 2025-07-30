@@ -27,26 +27,28 @@
 });
 
 // Simple global click handler for navigation links
-document.addEventListener("DOMContentLoaded", function() {
-            const registerLink = document.getElementById('registerLink');
-            const loginLink = document.getElementById('loginLink');
+document.addEventListener("click", function(e) {
+            console.log("Click detected on:", e.target);
+            console.log("Tag name:", e.target.tagName);
+            console.log("Text content:", e.target.textContent);
             
-            if (registerLink) {
-                registerLink.addEventListener('click', function(e) {
+            // Add visual feedback
+            document.getElementById('output').innerHTML += `<p>Clicked: ${e.target.tagName} - "${e.target.textContent}"</p>`;
+            
+            if (e.target.tagName.toLowerCase() === "a") {
+                const linkText = e.target.textContent.toLowerCase().trim();
+                console.log("Link text:", linkText);
+                
+                if (linkText.includes("register")) {
                     e.preventDefault();
-                    console.log("Direct register event fired");
-                    alert("Direct register event - would go to index2.html");
+                    console.log("Register link clicked - would redirect to index2.html");
+                    alert("Register link clicked! Would redirect to index2.html");
                     // window.location.href = "index2.html";
-                });
-            }
-            
-            if (loginLink) {
-                loginLink.addEventListener('click', function(e) {
+                } else if (linkText.includes("login")) {
                     e.preventDefault();
-                    console.log("Direct login event fired");
-                    alert("Direct login event - would go to index1.html");
+                    console.log("Login link clicked - would redirect to index1.html");
+                    alert("Login link clicked! Would redirect to index1.html");
                     // window.location.href = "index1.html";
-                });
+                }
             }
         });
-});
