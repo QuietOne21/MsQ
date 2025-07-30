@@ -18,7 +18,7 @@
                 });
                 
                 alert("Account created successfully!");
-                window.location.href = "index1.html"; // Redirect after successful registration
+                window.location.href = "index.html"; // Redirect after successful registration
             } catch (error) {
                 alert("Error: " + error.message);
             }
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 window.location.href = "index2.html";
             } else if (linkText.includes("login")) {
                 e.preventDefault();
-                window.location.href = "index1.html";
+                window.location.href = "index.html";
             }
         }
     });
