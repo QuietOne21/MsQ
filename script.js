@@ -27,16 +27,18 @@
 });
 
 // Simple global click handler for navigation links
-document.addEventListener("click", function(e) {
-    if (e.target.tagName === "A") {
-        const linkText = e.target.textContent.toLowerCase();
-        
-        if (linkText.includes("register")) {
-            e.preventDefault();
-            window.location.href = "index2.html"; // Redirect to registration page
-        } else if (linkText.includes("login")) {
-            e.preventDefault();
-            window.location.href = "index1.html"; // Redirect to login page
+document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("click", function(e) {
+        if (e.target.tagName.toLowerCase() === "a") {
+            const linkText = e.target.textContent.toLowerCase().trim();
+            
+            if (linkText.includes("register")) {
+                e.preventDefault();
+                window.location.href = "index2.html";
+            } else if (linkText.includes("login")) {
+                e.preventDefault();
+                window.location.href = "index1.html";
+            }
         }
-    }
+    });
 });
