@@ -28,17 +28,25 @@
 
 // Simple global click handler for navigation links
 document.addEventListener("DOMContentLoaded", function() {
-    document.addEventListener("click", function(e) {
-        if (e.target.tagName.toLowerCase() === "a") {
-            const linkText = e.target.textContent.toLowerCase().trim();
+            const registerLink = document.getElementById('registerLink');
+            const loginLink = document.getElementById('loginLink');
             
-            if (linkText.includes("register")) {
-                e.preventDefault();
-                window.location.href = "index2.html";
-            } else if (linkText.includes("login")) {
-                e.preventDefault();
-                window.location.href = "index.html";
+            if (registerLink) {
+                registerLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log("Direct register event fired");
+                    alert("Direct register event - would go to index2.html");
+                    // window.location.href = "index2.html";
+                });
             }
-        }
-    });
+            
+            if (loginLink) {
+                loginLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log("Direct login event fired");
+                    alert("Direct login event - would go to index1.html");
+                    // window.location.href = "index1.html";
+                });
+            }
+        });
 });
