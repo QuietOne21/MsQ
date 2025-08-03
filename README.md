@@ -1,2 +1,2 @@
-# MsQ
-Restaurant Reservation System v2
+# ReneQ
+Restaurant Reservation System
