@@ -60,7 +60,7 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
           body: JSON.stringify({email, password}) //Serialize request body
         });
 
@@ -72,9 +72,9 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
           setToken(data.token);
           localStorage.setItem('token',data.token); //store token persistently
           return {success: true, message: data.token};
-        else{
+        } else{
           //Login failed
-          return {success: false, error: data.error);
+          return {success: false, error: data.error};
         }
       } catch (error) {
         console.error('Login error:', error);
@@ -98,5 +98,6 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
 
 
                 
+
 
 
