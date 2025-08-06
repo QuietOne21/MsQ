@@ -51,6 +51,41 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
     }, []); //Empty dependency array - runs once on mount
 
 
+    //Login Function
+    const login = useCallback(async (email, password) => {
+      setLoading(true); 
+      try {
+        //Make API request
+        const response = await fecth(`${API_BASE_URL}/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+          body: JSON.stringify({email, password}) //Serialize request body
+        });
+
+        const data = await response.json(); //Parse response
+
+        if (response.ok) {
+          //Login successful
+          setUser(data.user);
+          setToken(data.token);
+          localStorage.setItem('token',data.token); //store token persistently
+          return {success: true, message: data.token};
+        else{
+          //Login failed
+          return {success: false, error: data.error);
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        return {success: false, error: 'Network error occurred'};
+        } finally {
+          setLoading(false);
+          }
+      }
+},[]);
+
+
 
 
 
@@ -63,3 +98,4 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
 
 
                 
+
