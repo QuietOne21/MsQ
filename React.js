@@ -26,21 +26,21 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
             //Verify token by fetchingu user profile - http request
             const response = await fecth(`${API_BASE_URL}/profile`, {
               headers: {
-                'Authentication': `Bearer ${storedToken}` // Include auth header
-                'Content-Type': `application/json`;
+                'Authentication': `Bearer ${storedToken}`,// Include auth header
+                'Content-Type': `application/json`
               }
             });
 
             if(response.ok) {
               const data = await response.json(); //Parse JSON response
-              serUser(date.user); //  Set current user
+              serUser(data.user); //  Set current user
               setToken(storedToken); //Set token state
             } else {
               localStorage.removeItem('token'); //Remove invalid token
               setToken(null); //Clear token state
             }
           }catch (error) {
-            console.log('Auth initialization error: ', error);
+            console.error('Auth initialization error: ', error);
             localStorage.removeItem('token');
             setToken(null);
           }
@@ -98,6 +98,7 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
 
 
                 
+
 
 
 
