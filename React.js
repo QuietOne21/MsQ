@@ -82,8 +82,41 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
         } finally {
           setLoading(false);
           }
-      }
-},[]);
+      },[]); //No dependencies, function is stable
+
+      //Register Function
+      const register = useCallbac(async (useerData) => {
+        setLoading(true);
+        try {
+          //Make registrarion API request
+          const response = await fetch(`${API_BASE_URL}/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+          });
+
+          const data = await response.json();
+
+          if(response.ok) {
+            //Registration Successful
+            setUser(data.user);
+            setToken(data.token);
+            localStorage.setItem('token', data.token);
+            return {success: true, message: data.message};
+          } else {
+            //Registration failed
+            return {success: false, message: data.error};
+          } catch (error) {
+            console.error('Registration error:',error);
+            return {success: false, error: 'Network error occured'};
+        } finally {
+          setLoading(false);
+        }
+      },[]);
+
+      
 
 
 
@@ -98,6 +131,7 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
 
 
                 
+
 
 
 
