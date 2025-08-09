@@ -195,13 +195,76 @@ const validateName = (name) => {
 const LoginForm - ({ onSwitchToRegister }) => {
   const {login, loading} = useAuth();
 
-  const [formDate, setFormulaData] = useState ({
+  const [formData, setFormulaData] = useState ({
     email: '',
     password: ''
   });
 
   const [errors, setErrors] = useState({}); 
   const [submitError, setSubmitError] = useState(''); //API error messages
+
+  const handleInputChange = (field) => (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({...prev, [field]: value}));
+
+  //Clear field-specific error when user starts typing
+  if (errors[field]) {
+    setErrors(prev => ({...prev, [field]: '' }));
+  }
+
+  if (submitError) {
+    setSubmitError('');
+  }
+};
+
+//Form validation function
+const ValidateForm = () => {
+  const newErrors ={}; //Object to store validation errors
+
+  if(!formData.email.trim() {
+    newErrors.email = 'Email is required';
+  }else if (!validateEmail(formData.email)) {
+    newErrors.email = 'Please enter a valid email address';
+  }
+
+  if(!formData.password) {
+    newErrors.password = 'Password is required';
+  }
+  
+  setErrors(newErrors);
+  return Object.keys(newErrors).length) === 0;
+};
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if(!ValidateForm()) return;
+  const result = await login(formData.email, formData.password);
+
+  if(!result.success){
+    setSubmitError(result.error);
+  }
+};
+
+return (
+  <div className="wrapper">
+    <form onSubmit={handleSubmit} id="loginForm">
+      <h2>Login Form<\h2>
+
+      {submitError && (
+        <div className="error-banner">
+            {submitError}
+        </div>
+  });
+
+
+
+
+  
+
+
+  
+  
 
 
 
@@ -216,6 +279,7 @@ const LoginForm - ({ onSwitchToRegister }) => {
 
 
                 
+
 
 
 
