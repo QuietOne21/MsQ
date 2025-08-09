@@ -116,7 +116,92 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
         }
       },[]);
 
-      
+
+      //Logout function
+      const logout = useCallback(async () => {
+        try{
+          if(token) {
+            //Make logout API request
+            await fetch(`${API_BASE_URL}/logout`,{
+              method: 'POST',
+              headers: {
+                'Authorization':`Bearer ${token}`,
+                'content-Type': 'application/json'
+              }
+            });
+          }
+        } catch (error) {
+          console.error)'Logout error:',error);
+        } finally {
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem('token');
+        }
+  }, [token]); //Depends on token
+
+
+  const contextValue = {
+    user, //Current user object
+    loading, //Loading state
+    token, //JWT token
+    login, //Login function
+    register, //Register function
+    logout, //Logout function
+    isAuthenticated: !!User //Boolean indicating if user is logged in
+  };
+
+  return (
+    <AuthContext.Provider value={contextValue}>
+    {children}
+    </AuthContext.Provider>
+  );
+};
+
+//Input Field Component with floating labels
+const InputField = ({type, value, onChange, label, required = false, error}) => {
+  return (
+    <div className="input-field">
+    <input
+      type={type} //Input Type
+      value={value} //Controlled input value
+      onChange={onChange} //Change handler function
+      required={required} //HTML Validation
+      className={error ? 'error' : ''} //Conditional CSS class
+    />
+
+    <label className={value ? 'acitve' : ''}>{label}</label>
+
+    <error && <span className="error-message">{error}</span>}
+  </div>
+);
+};
+
+//Form validation utility functions
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 254;
+};
+
+const validatePassword = (password) => {
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,128}$/;
+  return passwordRegex.test(password);
+};
+
+const validateName = (name) => {
+  const name = /^[a-zA-Z\s\-']{1,50}$/;
+  return nameRegex.test(name);
+};
+
+const LoginForm - ({ onSwitchToRegister }) => {
+  const {login, loading} = useAuth();
+
+  const [formDate, setFormulaData] = useState ({
+    email: '',
+    password: ''
+  });
+
+  const [errors, setErrors] = useState({}); 
+  const [submitError, setSubmitError] = useState(''); //API error messages
 
 
 
@@ -131,6 +216,7 @@ import React, {useState, useEffect, createContext, useCallback} from 'react;
 
 
                 
+
 
 
 
