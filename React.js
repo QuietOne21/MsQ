@@ -486,7 +486,6 @@ const [formData, setFormData] = useState({
     </p>
   </div>
 
-
 <button type="submit" disabled={loading}>
     {loading ? 'Creating Account...' : 'Submit'}
   </button>
@@ -496,7 +495,588 @@ const [formData, setFormData] = useState({
 };
 
 
+//Dashboard Component - Protected route for authenticated users
+const Dashboard = () => {
+  const { user, logout, loading } = useAuth();
+  const [userProfile, setUserProfile] = useState(user);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: user?.name || '',
+    surname: user?.surname || '',
+    phone: user?.phone || ''
+  });
+
+const [updateError, setUpdateError] = useState('');
+const [updateSuccess, setUpdateSuccess] = useState('');
+
+ const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+
+ try {
+      const token = localStorage.getItem('token');
+
+      // Make API request to update profile
+      const response = await fetch('http://localhost:5000/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editForm) // Serialize form data
+      });
+
+   If(response.ok) {
+        // Update successful
+        setUserProfile(data.user); //Update local profile state
+        setIsEditing(false); //Exit edit mode
+        setUpdateSuccess('Profile updated successfully!');
+        setUpdateError('');
+
+        setTimeout(() => setUpdateSuccess(''), 3000);
+    } else {
+        setUpdateError(data.error);
+        setUpdateSuccess('');
+       }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      setUpdateError('Network error occurred');
+      setUpdateSuccess('');
+    }
+  };
+
+// Handle edit form changes
+  const handleEditChange = (field) => (e) => {
+    const value = e.target.value; // Get input value - O(1)
+    setEditForm(prev => ({ ...prev, [field]: value })); // Update edit form
+    
+    if (updateError) setUpdateError('');
+    if (updateSuccess) setUpdateSuccess('');
+  };
+
+ const handleLogout = async () => {
+    await logout();
+  };
 
 
+ return (
+    <div className="dashboard-container">
+      <div className="wrapper dashboard-wrapper">
+        <div className="dashboard-header">
+          <h2>Welcome, {userProfile?.name || 'User'}!</h2>
+          <button onClick={handleLogout} className="logout-btn" disabled={loading}>
+            {loading ? 'Logging out...' : 'Logout'}
+          </button>
+        </div>
+
+ {updateError && <div className="error-banner">{updateError}</div>}
+ {updateSuccess && <div className="success-banner">{updateSuccess}</div>}
 
 
+{!isEditing ? (
+          <div className="profile-info">
+            <h3>Profile Information</h3>
+            <div className="info-grid">
+              <div className="info-item">
+                <label>Name:</label>
+                <span>{userProfile?.name}</span>
+              </div>
+              <div className="info-item">
+                <label>Surname:</label>
+                <span>{userProfile?.surname}</span>
+              </div>
+              <div className="info-item">
+                <label>Email:</label>
+                <span>{userProfile?.email}</span>
+              </div>
+              <div className="info-item">
+                <label>Phone:</label>
+                <span>{userProfile?.phone}</span>
+              </div>
+              <div className="info-item">
+                <label>Member since:</label>
+                <span>{new Date(userProfile?.createdAt).toLocaleDateString()}</span>
+              </div>
+              {userProfile?.lastLogin && (
+                <div className="info-item">
+                  <label>Last login:</label>
+                  <span>{new Date(userProfile.lastLogin).toLocaleString()}</span>
+                </div>
+              )}
+            </div>
+            <button 
+              onClick={() => setIsEditing(true)} 
+              className="edit-btn"
+            >
+              Edit Profile
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleUpdateProfile} className="edit-form">
+            <h3>Edit Profile</h3>
+            
+            <InputField
+              type="text"
+              value={editForm.name}
+              onChange={handleEditChange('name')}
+              label="Name"
+              required
+            />
+            
+            <InputField
+              type="text"
+              value={editForm.surname}
+              onChange={handleEditChange('surname')}
+              label="Surname"
+              required
+            />
+            
+            <InputField
+              type="tel"
+              value={editForm.phone}
+              onChange={handleEditChange('phone')}
+              label="Phone Number"
+              required
+            />
+            
+            <div className="form-actions">
+              <button type="submit" className="save-btn">
+                Save Changes
+              </button>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditForm({
+                    name: userProfile?.name || '',
+                    surname: userProfile?.surname || '',
+                    phone: userProfile?.phone || ''
+                  });
+                  setUpdateError('');
+                  setUpdateSuccess('');
+                }}
+                className="cancel-btn"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
+//Main App Component - Root component with routing logic
+const App = () => {
+  const [currentView, setCurrentView] = useState('login'); // View state: 'login' or 'register'
+
+return (
+    <AuthProvider>
+      <div className="app">
+        <link 
+          rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+        />
+
+
+<style jsx>{`
+          /* Import Google Fonts*/
+          @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");
+          
+          /* Global reset and base styles*/
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Open Sans", sans-serif;
+          }
+          
+          /* Body styling with gradient background*/
+          body, .app {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e90ff 0%, #add8e6 100%);
+            position: relative;
+          }
+          
+          /* Glassmorphism card styling*/
+          .wrapper {
+            width: 500px;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            transition: all 0.3s ease;
+          }
+          
+          /* Hover effects*/
+          .wrapper:hover {
+            box-shadow: 0 12px 48px rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+          }
+          
+          /* Form styling*/
+          form {
+            display: flex;
+            flex-direction: column;
+          }
+          
+          /* Heading styles*/
+          h2, h3 {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+          }
+          
+          h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+          }
+          
+          /* Input field styling*/
+          .input-field {
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+            margin: 15px 0;
+          }
+          
+          .input-field label {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            color: #ffffff;
+            font-size: 16px;
+            pointer-events: none;
+            transition: 0.3s ease;
+          }
+          
+          .input-field input {
+            width: 100%;
+            height: 40px;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #ffffff;
+            padding: 0 10px;
+          }
+          
+          .input-field input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+          }
+          
+          /* Floating label animation*/
+          .input-field input:focus ~ label,
+          .input-field input:valid ~ label,
+          .input-field label.active {
+            font-size: 0.9rem;
+            top: 10px;
+            transform: translateY(-150%);
+            color: #ffffff;
+          }
+          
+          .input-field input:focus {
+            border-bottom-color: #ffffff;
+          }
+          
+          /* Error styling*/
+          .input-field.error input {
+            border-bottom-color: #ff6b6b;
+          }
+          
+          .error-message {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: block;
+            text-align: left;
+          }
+          
+          .error-banner {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+          }
+          
+          .success-banner {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.5);
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+          }
+          
+          /* Button styling*/
+          button {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #ffffff;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            margin-top: 10px;
+          }
+          
+          button:hover:not(:disabled) {
+            background: #002147;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+          }
+          
+          button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+          }
+          
+          /* Link styling*/
+          .forget, .register, .signIn {
+            margin: 15px 0;
+          }
+          
+          .forget a, .register a, .signIn a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+          }
+          
+          .forget a:hover, .register a:hover, .signIn a:hover {
+            text-decoration: underline;
+            color: #add8e6;
+          }
+          
+          .register p, .signIn p {
+            color: #ffffff;
+          }
+          
+          /* Social media styling*/
+          .social-platforms {
+            margin-top: 30px;
+          }
+          
+          .social-platforms p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+          }
+          
+          .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+          }
+          
+          .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: #ffffff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 18px;
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .social-icons a:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+          }
+          
+          /* Dashboard specific styling*/
+          .dashboard-container {
+            width: 100%;
+            max-width: 800px;
+          }
+          
+          .dashboard-wrapper {
+            width: 100%;
+            max-width: none;
+            text-align: left;
+          }
+          
+          .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+          }
+          
+          .logout-btn {
+            width: auto;
+            padding: 10px 20px;
+            height: auto;
+          }
+          
+          .profile-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+          }
+          
+          .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+          }
+          
+          .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+          }
+          
+          .info-item label {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+          }
+          
+          .info-item span {
+            color: #ffffff;
+            font-size: 1rem;
+          }
+          
+          .edit-btn, .save-btn, .cancel-btn {
+            width: auto;
+            padding: 10px 20px;
+            height: auto;
+            margin: 5px;
+          }
+          
+          .edit-form {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+          }
+          
+          .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+          }
+          
+          .cancel-btn {
+            background: rgba(255, 107, 107, 0.3);
+          }
+          
+          .cancel-btn:hover:not(:disabled) {
+            background: rgba(255, 107, 107, 0.5);
+          }
+          
+          /* Responsive design - O(1) */
+          @media (max-width: 480px) {
+            .wrapper {
+              width: 90%;
+              padding: 30px;
+            }
+            
+            h2 {
+              font-size: 1.8rem;
+            }
+            
+            .social-icons {
+              gap: 10px;
+            }
+            
+            .social-icons a {
+              width: 42px;
+              height: 42px;
+              font-size: 16px;
+            }
+            
+            .dashboard-header {
+              flex-direction: column;
+              text-align: center;
+            }
+            
+            .info-grid {
+              grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+              flex-direction: column;
+            }
+            
+            .edit-btn, .save-btn, .cancel-btn {
+              width: 100%;
+            }
+          }
+        `}</style>
+        
+
+ {/* Conditional rendering based on authentication state*/}
+        <AuthContent currentView={currentView} setCurrentView={setCurrentView} />
+      </div>
+    </AuthProvider>
+  );
+};
+
+//Auth Content Component - Handles view switching based on auth state
+const AuthContent = ({ currentView, setCurrentView }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+
+//Show loading spinner during auth operations
+  if (loading) {
+    return (
+      <div className="wrapper">
+        <div style={{ padding: '40px', textAlign: 'center', color: '#ffffff' }}>
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+
+ //Show dashboard if authenticated
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
+
+//Show login or register form based on current view
+  return currentView === 'login' ? (
+    <LoginForm onSwitchToRegister={() => setCurrentView('register')} />
+  ) : (
+    <RegisterForm onSwitchToLogin={() => setCurrentView('login')} />
+  );
+};
+
+export default App;
