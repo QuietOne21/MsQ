@@ -1,182 +1,183 @@
-import React, {useState, useEffect, createContext, useCallback} from 'react;
+import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 
-  //Authentication Context - Global State management for auth
-    const AuthContext = createContext(null);
-    const useAuth = () => {
-      const context = useContext(AuthContext); //Get context value
-      if(!context){
-        throw new Error('useAuth must be used within an AuthProvider');
-      }
-      return context;
-    };
+// Authentication Context - Global State management for auth
+const AuthContext = createContext(null);
 
-    //Authentication Provider Component - Manages global auth state
-    const [user, setUser] = useState(null); //Current user object
-    const [loading, SetLoading] = useState(true) // Loading state for async opeations
-    const [token, setToken] = useState(localStorage.getItem('token')); //JWT token from localStorage
+// Custom hook to use auth context
+const useAuth = () => {
+  const context = useContext(AuthContext); // Get context value
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
-    //API base URL - centralized configuration
-    const API_BASE_URL = 'http://localhost:5000/api';
+// Authentication Provider Component - Manages global auth state
+const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null); // Current user object
+  const [loading, setLoading] = useState(true); // Loading state for async operations
+  const [token, setToken] = useState(localStorage.getItem('token')); // JWT token from localStorage
 
-    useEffect(() => {
-      const initializeAuth = async () => {
-        const storedToken = localStorage.getItem('token'); //Get token from localStorage
-        if(storedToken) {
-          try {
-            //Verify token by fetchingu user profile - http request
-            const response = await fecth(`${API_BASE_URL}/profile`, {
-              headers: {
-                'Authentication': `Bearer ${storedToken}`,// Include auth header
-                'Content-Type': `application/json`
-              }
-            });
+  // API base URL - centralized configuration
+  const API_BASE_URL = 'http://localhost:5000/api';
 
-            if(response.ok) {
-              const data = await response.json(); //Parse JSON response
-              serUser(data.user); //  Set current user
-              setToken(storedToken); //Set token state
-            } else {
-              localStorage.removeItem('token'); //Remove invalid token
-              setToken(null); //Clear token state
-            }
-          }catch (error) {
-            console.error('Auth initialization error: ', error);
-            localStorage.removeItem('token');
-            setToken(null);
-          }
-        }
-        setLoading(false); // Set loading complete
-      };
-      initializeAuth();
-    }, []); //Empty dependency array - runs once on mount
-
-
-    //Login Function
-    const login = useCallback(async (email, password) => {
-      setLoading(true); 
-      try {
-        //Make API request
-        const response = await fecth(`${API_BASE_URL}/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({email, password}) //Serialize request body
-        });
-
-        const data = await response.json(); //Parse response
-
-        if (response.ok) {
-          //Login successful
-          setUser(data.user);
-          setToken(data.token);
-          localStorage.setItem('token',data.token); //store token persistently
-          return {success: true, message: data.token};
-        } else{
-          //Login failed
-          return {success: false, error: data.error};
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        return {success: false, error: 'Network error occurred'};
-        } finally {
-          setLoading(false);
-          }
-      },[]); //No dependencies, function is stable
-
-      //Register Function
-      const register = useCallbac(async (useerData) => {
-        setLoading(true);
+  // Initialize authentication on component mount
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('token'); // Get token from localStorage
+      if (storedToken) {
         try {
-          //Make registrarion API request
-          const response = await fetch(`${API_BASE_URL}/register`, {
-            method: 'POST',
+          // Verify token by fetching user profile - http request
+          const response = await fetch(`${API_BASE_URL}/profile`, {
             headers: {
+              'Authorization': `Bearer ${storedToken}`, // Include auth header
               'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
+            }
           });
 
-          const data = await response.json();
-
-          if(response.ok) {
-            //Registration Successful
-            setUser(data.user);
-            setToken(data.token);
-            localStorage.setItem('token', data.token);
-            return {success: true, message: data.message};
+          if (response.ok) {
+            const data = await response.json(); // Parse JSON response
+            setUser(data.user); // Set current user
+            setToken(storedToken); // Set token state
           } else {
-            //Registration failed
-            return {success: false, message: data.error};
-          } catch (error) {
-            console.error('Registration error:',error);
-            return {success: false, error: 'Network error occured'};
-        } finally {
-          setLoading(false);
-        }
-      },[]);
-
-
-      //Logout function
-      const logout = useCallback(async () => {
-        try{
-          if(token) {
-            //Make logout API request
-            await fetch(`${API_BASE_URL}/logout`,{
-              method: 'POST',
-              headers: {
-                'Authorization':`Bearer ${token}`,
-                'content-Type': 'application/json'
-              }
-            });
+            localStorage.removeItem('token'); // Remove invalid token
+            setToken(null); // Clear token state
           }
         } catch (error) {
-          console.error)'Logout error:',error);
-        } finally {
-          setUser(null);
-          setToken(null);
+          console.error('Auth initialization error: ', error);
           localStorage.removeItem('token');
+          setToken(null);
         }
-  }, [token]); //Depends on token
+      }
+      setLoading(false); // Set loading complete
+    };
+    initializeAuth();
+  }, []); // Empty dependency array - runs once on mount
 
+  // Login Function
+  const login = useCallback(async (email, password) => {
+    setLoading(true);
+    try {
+      // Make API request
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password }) // Serialize request body
+      });
 
+      const data = await response.json(); // Parse response
+
+      if (response.ok) {
+        // Login successful
+        setUser(data.user);
+        setToken(data.token);
+        localStorage.setItem('token', data.token); // Store token persistently
+        return { success: true, message: data.message };
+      } else {
+        // Login failed
+        return { success: false, error: data.error };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: 'Network error occurred' };
+    } finally {
+      setLoading(false);
+    }
+  }, []); // No dependencies, function is stable
+
+  // Register Function
+  const register = useCallback(async (userData) => {
+    setLoading(true);
+    try {
+      // Make registration API request
+      const response = await fetch(`${API_BASE_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Registration Successful
+        setUser(data.user);
+        setToken(data.token);
+        localStorage.setItem('token', data.token);
+        return { success: true, message: data.message };
+      } else {
+        // Registration failed
+        return { success: false, error: data.error };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'Network error occurred' };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Logout function
+  const logout = useCallback(async () => {
+    try {
+      if (token) {
+        // Make logout API request
+        await fetch(`${API_BASE_URL}/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('token');
+    }
+  }, [token]); // Depends on token
+
+  // Context value object
   const contextValue = {
-    user, //Current user object
-    loading, //Loading state
-    token, //JWT token
-    login, //Login function
-    register, //Register function
-    logout, //Logout function
-    isAuthenticated: !!User //Boolean indicating if user is logged in
+    user, // Current user object
+    loading, // Loading state
+    token, // JWT token
+    login, // Login function
+    register, // Register function
+    logout, // Logout function
+    isAuthenticated: !!user // Boolean indicating if user is logged in
   };
 
   return (
     <AuthContext.Provider value={contextValue}>
-    {children}
+      {children}
     </AuthContext.Provider>
   );
 };
 
-//Input Field Component with floating labels
-const InputField = ({type, value, onChange, label, required = false, error}) => {
+// Input Field Component with floating labels
+const InputField = ({ type, value, onChange, label, required = false, error }) => {
   return (
     <div className="input-field">
-    <input
-      type={type} //Input Type
-      value={value} //Controlled input value
-      onChange={onChange} //Change handler function
-      required={required} //HTML Validation
-      className={error ? 'error' : ''} //Conditional CSS class
-    />
-
-    <label className={value ? 'acitve' : ''}>{label}</label>
-
-    <error && <span className="error-message">{error}</span>}
-  </div>
-);
+      <input
+        type={type} // Input Type
+        value={value} // Controlled input value
+        onChange={onChange} // Change handler function
+        required={required} // HTML Validation
+        className={error ? 'error' : ''} // Conditional CSS class
+      />
+      <label className={value ? 'active' : ''}>{label}</label>
+      {error && <span className="error-message">{error}</span>}
+    </div>
+  );
 };
 
-//Form validation utility functions
+// Form validation utility functions
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email) && email.length <= 254;
@@ -188,115 +189,129 @@ const validatePassword = (password) => {
 };
 
 const validateName = (name) => {
-  const name = /^[a-zA-Z\s\-']{1,50}$/;
+  const nameRegex = /^[a-zA-Z\s\-']{1,50}$/;
   return nameRegex.test(name);
 };
 
-const LoginForm - ({ onSwitchToRegister }) => {
-  const {login, loading} = useAuth();
+const validatePhone = (phone) => {
+  const phoneRegex = /^\+?[\d\s\-()]{10,15}$/;
+  return phoneRegex.test(phone);
+};
 
-  const [formData, setFormulaData] = useState ({
+// Login Form Component
+const LoginForm = ({ onSwitchToRegister }) => {
+  const { login, loading } = useAuth();
+
+  const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  const [errors, setErrors] = useState({}); 
-  const [submitError, setSubmitError] = useState(''); //API error messages
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState(''); // API error messages
 
+  // Handle input changes with field-specific updates
   const handleInputChange = (field) => (e) => {
     const value = e.target.value;
-    setFormData(prev => ({...prev, [field]: value}));
+    setFormData(prev => ({ ...prev, [field]: value }));
 
-  //Clear field-specific error when user starts typing
-  if (errors[field]) {
-    setErrors(prev => ({...prev, [field]: '' }));
-  }
+    // Clear field-specific error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
 
-  if (submitError) {
-    setSubmitError('');
-  }
-};
+    if (submitError) {
+      setSubmitError('');
+    }
+  };
 
-//Form validation function
-const ValidateForm = () => {
-  const newErrors ={}; //Object to store validation errors
+  // Form validation function
+  const validateForm = () => {
+    const newErrors = {}; // Object to store validation errors
 
-  if(!formData.email.trim() {
-    newErrors.email = 'Email is required';
-  }else if (!validateEmail(formData.email)) {
-    newErrors.email = 'Please enter a valid email address';
-  }
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
 
-  if(!formData.password) {
-    newErrors.password = 'Password is required';
-  }
-  
-  setErrors(newErrors);
-  return Object.keys(newErrors).length) === 0;
-};
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
 
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if(!ValidateForm()) return;
-  const result = await login(formData.email, formData.password);
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    const result = await login(formData.email, formData.password);
 
-  if(!result.success){
-    setSubmitError(result.error);
-  }
-};
+    if (!result.success) {
+      setSubmitError(result.error);
+    }
+  };
 
-return (
-  <div className="wrapper">
-    <form onSubmit={handleSubmit} id="loginForm">
-      <h2>Login Form<\h2>
+  return (
+    <div className="wrapper">
+      <form onSubmit={handleSubmit} id="loginForm">
+        <h2>Login Form</h2>
 
-      {submitError && (
-        <div className="error-banner">
+        {submitError && (
+          <div className="error-banner">
             {submitError}
+          </div>
+        )}
+
+        {/* Email input field */}
+        <InputField
+          type="email"
+          value={formData.email}
+          onChange={handleInputChange('email')}
+          label="Enter your email"
+          required
+          error={errors.email}
+        />
+
+        {/* Password input field */}
+        <InputField
+          type="password"
+          value={formData.password}
+          onChange={handleInputChange('password')}
+          label="Enter your password"
+          required
+          error={errors.password}
+        />
+
+        {/* Forgot password link */}
+        <div className="forget">
+          <a href="#" onClick={(e) => { 
+            e.preventDefault(); 
+            alert('Forgot password functionality would be implemented here'); 
+          }}>
+            Forgot password?
+          </a>
         </div>
-  });
 
-//Email input field
- <InputField
-      type="email"
-      value={formData.email}
-      onChange={handleInputChange('email')}
-      label="Enter your email"
-      required
-      error={errors.email}
-  />
+        {/* Submit button */}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Log In'}
+        </button>
 
-//Password input field
-<InputField
-      type="password"
-      value={formData.password}
-      onChange={handleInputChange('password')}
-      label="Enter your password"
-      required
-      error={errors.password}
-  />
+        {/* Register link */}
+        <div className="register">
+          <p>Don't have an account?
+            <a href="#" onClick={(e) => { 
+              e.preventDefault(); 
+              onSwitchToRegister(); 
+            }}> Register</a>
+          </p>
+        </div>
 
-//Forgot password link
-<div className="forget">
-    <a href="#" onClick={(e) => { e.preventDefault(); alert('Forgot password functionality would be implemented here'); }}>
-    Forgot password?</a>
-  </div>
-
-//Submit button
- <button type="submit" disabled={loading}>
-    {loading ? 'Logging in...' : 'Log In'}
-  </button>
-
- //Register link
-  <div className="register">
-      <p>Don't have an account? 
-        <a href="#" onClick={(e) => { e.preventDefault(); onSwitchToRegister(); }}> Register</a>
-      </p>
-  </div>
-
-  //Social media links
-  <div className="social-platforms">
+        {/* Social media links */}
+        <div className="social-platforms">
           <p>Check out our social media accounts</p>
           <div className="social-icons">
             <a href="#" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
@@ -318,100 +333,98 @@ return (
   );
 };
 
-//Register form component
-const RegisterForm = ({ onSwitchToLogin}) =>
-  const {register, loading} = useAuth();
+// Register form component
+const RegisterForm = ({ onSwitchToLogin }) => {
+  const { register, loading } = useAuth();
 
-//Form state using React hooks
-const [formData, setFormData] = useState({
-    name: '', 
+  // Form state using React hooks
+  const [formData, setFormData] = useState({
+    name: '',
     surname: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: ''
- });
+  });
 
- //Error state for form validation
- const [errors, setErrors] = useState({});
- const [submitError, setSubmitError] = useState(''); 
+  // Error state for form validation
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
 
-
- // Handle input changes
+  // Handle input changes
   const handleInputChange = (field) => (e) => {
-    const value = e.target.value; 
+    const value = e.target.value;
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
-    
+
     if (submitError) {
       setSubmitError('');
     }
   };
 
-
- const validateForm = () => {
+  // Comprehensive form validation
+  const validateForm = () => {
     const newErrors = {};
-    
-    //Name validation
+
+    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'First name is required';
     } else if (!validateName(formData.name)) {
       newErrors.name = 'Name must contain only letters, spaces, hyphens, and apostrophes (1-50 chars)';
     }
-    
-    //Surname validation
+
+    // Surname validation
     if (!formData.surname.trim()) {
       newErrors.surname = 'Last name is required';
     } else if (!validateName(formData.surname)) {
       newErrors.surname = 'Surname must contain only letters, spaces, hyphens, and apostrophes (1-50 chars)';
     }
-    
-    //Email validation
+
+    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
-    //Phone validation
+
+    // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
     } else if (!validatePhone(formData.phone)) {
       newErrors.phone = 'Please enter a valid phone number (10-15 digits)';
     }
-    
-    //Password validation
+
+    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (!validatePassword(formData.password)) {
       newErrors.password = 'Password must be 8-128 characters with uppercase, lowercase, number, and special character';
     }
-    
-    //Confirm password validation
+
+    // Confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-
- const handleSubmit = async (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    //Attempt registration via context function
+    // Attempt registration via context function
     const result = await register(formData);
     if (!result.success) {
       setSubmitError(result.error);
     }
   };
-
 
   return (
     <div className="wrapper">
@@ -420,82 +433,83 @@ const [formData, setFormData] = useState({
         {submitError && (
           <div className="error-banner">
             {submitError}
-      </div>
-    )} 
+          </div>
+        )}
 
- <InputField
-    type="text"
-    value={formData.name}
-    onChange={handleInputChange('name')}
-    label="Name"
-    required
-    error={errors.name}
-  />
+        <InputField
+          type="text"
+          value={formData.name}
+          onChange={handleInputChange('name')}
+          label="Name"
+          required
+          error={errors.name}
+        />
 
-<InputField
-    type="text"
-    value={formData.surname}
-    onChange={handleInputChange('surname')}
-    label="Surname"
-    required
-    error={errors.surname}
- />
+        <InputField
+          type="text"
+          value={formData.surname}
+          onChange={handleInputChange('surname')}
+          label="Surname"
+          required
+          error={errors.surname}
+        />
 
-<InputField
-    type="email"
-    value={formData.email}
-    onChange={handleInputChange('email')}
-    label="Email"
-    required
-    error={errors.email}
-/>
+        <InputField
+          type="email"
+          value={formData.email}
+          onChange={handleInputChange('email')}
+          label="Email"
+          required
+          error={errors.email}
+        />
 
+        <InputField
+          type="tel"
+          value={formData.phone}
+          onChange={handleInputChange('phone')}
+          label="Phone Number"
+          required
+          error={errors.phone}
+        />
 
-<InputField
-    type="tel"
-    value={formData.phone}
-    onChange={handleInputChange('phone')}
-    label="Phone Number"
-    required
-    error={errors.phone}
-  />
+        <InputField
+          type="password"
+          value={formData.password}
+          onChange={handleInputChange('password')}
+          label="Create Password"
+          required
+          error={errors.password}
+        />
 
-<InputField
-    type="password"
-    value={formData.password}
-    onChange={handleInputChange('password')}
-    label="Create Password"
-    required
-    error={errors.password}
-/>
+        <InputField
+          type="password"
+          value={formData.confirmPassword}
+          onChange={handleInputChange('confirmPassword')}
+          label="Confirm Password"
+          required
+          error={errors.confirmPassword}
+        />
 
-<InputField
-    type="password"
-    value={formData.confirmPassword}
-    onChange={handleInputChange('confirmPassword')}
-    label="Confirm Password"
-    required
-    error={errors.confirmPassword}
-  />
+        <div className="signIn">
+          <p>Already have an account?
+            <a href="#" onClick={(e) => { 
+              e.preventDefault(); 
+              onSwitchToLogin(); 
+            }}>
+              login
+            </a>
+          </p>
+        </div>
 
-
- <div className="signIn">
-   <p>Already have an account? 
-      <a href="#" onClick={(e) => { e.preventDefault(); onSwitchToLogin(); }}>
-        login</a>
-    </p>
-  </div>
-
-<button type="submit" disabled={loading}>
-    {loading ? 'Creating Account...' : 'Submit'}
-  </button>
-</form>
-  </div>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Creating Account...' : 'Submit'}
+        </button>
+      </form>
+    </div>
   );
 };
 
-
-//Dashboard Component - Protected route for authenticated users
+// Dashboard Component - Protected route for authenticated users
 const Dashboard = () => {
   const { user, logout, loading } = useAuth();
   const [userProfile, setUserProfile] = useState(user);
@@ -506,13 +520,14 @@ const Dashboard = () => {
     phone: user?.phone || ''
   });
 
-const [updateError, setUpdateError] = useState('');
-const [updateSuccess, setUpdateSuccess] = useState('');
+  const [updateError, setUpdateError] = useState('');
+  const [updateSuccess, setUpdateSuccess] = useState('');
 
- const handleUpdateProfile = async (e) => {
+  // Handle profile update submission
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
 
- try {
+    try {
       const token = localStorage.getItem('token');
 
       // Make API request to update profile
@@ -525,18 +540,20 @@ const [updateSuccess, setUpdateSuccess] = useState('');
         body: JSON.stringify(editForm) // Serialize form data
       });
 
-   If(response.ok) {
+      const data = await response.json();
+
+      if (response.ok) {
         // Update successful
-        setUserProfile(data.user); //Update local profile state
-        setIsEditing(false); //Exit edit mode
+        setUserProfile(data.user); // Update local profile state
+        setIsEditing(false); // Exit edit mode
         setUpdateSuccess('Profile updated successfully!');
         setUpdateError('');
 
         setTimeout(() => setUpdateSuccess(''), 3000);
-    } else {
+      } else {
         setUpdateError(data.error);
         setUpdateSuccess('');
-       }
+      }
     } catch (error) {
       console.error('Profile update error:', error);
       setUpdateError('Network error occurred');
@@ -544,21 +561,21 @@ const [updateSuccess, setUpdateSuccess] = useState('');
     }
   };
 
-// Handle edit form changes
+  // Handle edit form changes
   const handleEditChange = (field) => (e) => {
-    const value = e.target.value; // Get input value - O(1)
+    const value = e.target.value; // Get input value
     setEditForm(prev => ({ ...prev, [field]: value })); // Update edit form
-    
+
     if (updateError) setUpdateError('');
     if (updateSuccess) setUpdateSuccess('');
   };
 
- const handleLogout = async () => {
+  // Handle logout with async operation
+  const handleLogout = async () => {
     await logout();
   };
 
-
- return (
+  return (
     <div className="dashboard-container">
       <div className="wrapper dashboard-wrapper">
         <div className="dashboard-header">
@@ -568,11 +585,10 @@ const [updateSuccess, setUpdateSuccess] = useState('');
           </button>
         </div>
 
- {updateError && <div className="error-banner">{updateError}</div>}
- {updateSuccess && <div className="success-banner">{updateSuccess}</div>}
+        {updateError && <div className="error-banner">{updateError}</div>}
+        {updateSuccess && <div className="success-banner">{updateSuccess}</div>}
 
-
-{!isEditing ? (
+        {!isEditing ? (
           <div className="profile-info">
             <h3>Profile Information</h3>
             <div className="info-grid">
@@ -603,8 +619,8 @@ const [updateSuccess, setUpdateSuccess] = useState('');
                 </div>
               )}
             </div>
-            <button 
-              onClick={() => setIsEditing(true)} 
+            <button
+              onClick={() => setIsEditing(true)}
               className="edit-btn"
             >
               Edit Profile
@@ -613,7 +629,7 @@ const [updateSuccess, setUpdateSuccess] = useState('');
         ) : (
           <form onSubmit={handleUpdateProfile} className="edit-form">
             <h3>Edit Profile</h3>
-            
+
             <InputField
               type="text"
               value={editForm.name}
@@ -621,7 +637,7 @@ const [updateSuccess, setUpdateSuccess] = useState('');
               label="Name"
               required
             />
-            
+
             <InputField
               type="text"
               value={editForm.surname}
@@ -629,7 +645,7 @@ const [updateSuccess, setUpdateSuccess] = useState('');
               label="Surname"
               required
             />
-            
+
             <InputField
               type="tel"
               value={editForm.phone}
@@ -637,13 +653,13 @@ const [updateSuccess, setUpdateSuccess] = useState('');
               label="Phone Number"
               required
             />
-            
+
             <div className="form-actions">
               <button type="submit" className="save-btn">
                 Save Changes
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => {
                   setIsEditing(false);
                   setEditForm({
@@ -666,20 +682,49 @@ const [updateSuccess, setUpdateSuccess] = useState('');
   );
 };
 
-//Main App Component - Root component with routing logic
+// Auth Content Component - Handles view switching based on auth state
+const AuthContent = ({ currentView, setCurrentView }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  // Show loading spinner during auth operations
+  if (loading) {
+    return (
+      <div className="wrapper">
+        <div style={{ padding: '40px', textAlign: 'center', color: '#ffffff' }}>
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  // Show dashboard if authenticated
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
+
+  // Show login or register form based on current view
+  return currentView === 'login' ? (
+    <LoginForm onSwitchToRegister={() => setCurrentView('register')} />
+  ) : (
+    <RegisterForm onSwitchToLogin={() => setCurrentView('login')} />
+  );
+};
+
+// Main App Component - Root component with routing logic
 const App = () => {
   const [currentView, setCurrentView] = useState('login'); // View state: 'login' or 'register'
 
-return (
+  return (
     <AuthProvider>
       <div className="app">
-        <link 
-          rel="stylesheet" 
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+        {/* External CSS for Font Awesome icons */}
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         />
 
-
-<style jsx>{`
+        {/* Inline styles for complete component styling */}
+        <style jsx>{`
           /* Import Google Fonts*/
           @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");
           
@@ -1001,7 +1046,7 @@ return (
             background: rgba(255, 107, 107, 0.5);
           }
           
-          /* Responsive design - O(1) */
+          /* Responsive design */
           @media (max-width: 480px) {
             .wrapper {
               width: 90%;
@@ -1040,42 +1085,11 @@ return (
             }
           }
         `}</style>
-        
 
- {/* Conditional rendering based on authentication state*/}
+        {/* Conditional rendering based on authentication state*/}
         <AuthContent currentView={currentView} setCurrentView={setCurrentView} />
       </div>
     </AuthProvider>
-  );
-};
-
-//Auth Content Component - Handles view switching based on auth state
-const AuthContent = ({ currentView, setCurrentView }) => {
-  const { isAuthenticated, loading } = useAuth();
-
-
-//Show loading spinner during auth operations
-  if (loading) {
-    return (
-      <div className="wrapper">
-        <div style={{ padding: '40px', textAlign: 'center', color: '#ffffff' }}>
-          Loading...
-        </div>
-      </div>
-    );
-  }
-
-
- //Show dashboard if authenticated
-  if (isAuthenticated) {
-    return <Dashboard />;
-  }
-
-//Show login or register form based on current view
-  return currentView === 'login' ? (
-    <LoginForm onSwitchToRegister={() => setCurrentView('register')} />
-  ) : (
-    <RegisterForm onSwitchToLogin={() => setCurrentView('login')} />
   );
 };
 
