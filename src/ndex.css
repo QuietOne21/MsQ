@@ -1,1 +1,36 @@
+/* Global CSS Reset and Base Styles */
+
+/* Import Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");
+
+/* Global reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* Body styling with gradient background */
+body, #root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(135deg, #1e90ff 0%, #add8e6 100%);
+  position: relative;
+  margin: 0;
+}
+
+/* Remove default focus outline for better custom styling */
+*:focus {
+  outline: none;
+}
+
+/* Ensure smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
 
