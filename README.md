@@ -1,7 +1,7 @@
 # ReneQ
 Restaurant Reservation System
 
-ReneQ/
+restaurant-rsvp/
 ├── client/                 # React frontend
 │   ├── public/
 │   │   ├── index.html
@@ -17,9 +17,18 @@ ReneQ/
 │   ├── package.json
 │   └── tailwind.config.js
 ├── server/                 # Express backend
+│   ├── config/
+│   │   └── database.js
 │   ├── routes/
 │   │   └── auth.js
+│   ├── middleware/
+│   │   └── validation.js
+│   ├── models/
+│   │   └── User.js
 │   ├── server.js
-│   └── package.json
+│   ├── package.json
+│   └── .env.example
+├── sql/
+│   └── init.sql
 ├── README.md
 └── .gitignore
